@@ -16,12 +16,12 @@ MAX_TEXT_LEN = 77
 
 
 class StableDiffusion:
-    def __init__(self, img_height=1000, img_width=1000, jit_compile=False, download_weights=True):
+    def __init__(self, local_weights_path, img_height=256, img_width=256, jit_compile=False):
         self.img_height = img_height
         self.img_width = img_width
         self.tokenizer = SimpleTokenizer()
 
-        text_encoder, diffusion_model, decoder, encoder = get_models(img_height, img_width, download_weights=download_weights)
+        text_encoder, diffusion_model, decoder, encoder = get_models(img_height, img_width, local_weights_path)
         self.text_encoder = text_encoder
         self.diffusion_model = diffusion_model
         self.decoder = decoder
@@ -255,7 +255,7 @@ def get_models(img_height, img_width, local_weights_path=None):
 
     # Load diffusion model weights from local file if provided, otherwise download
     if local_weights_path and os.path.exists(local_weights_path):
-        diffusion_model_weights_fpath = keras.utils.get_file(local_weights_path)
+        diffusion_model_weights_fpath = local_weights_path
     else:
         diffusion_model_weights_fpath = keras.utils.get_file(
             origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/diffusion_model.h5",

@@ -219,7 +219,8 @@ class StableDiffusion:
             getattr(self, module_name).set_weights(module_weights)
             print("Loaded %d weights for %s"%(len(module_weights) , module_name))
 
-def get_models(img_height, img_width, download_weights=True):
+
+def get_models(img_height, img_width, local_weights_path=None):
     n_h = img_height // 8
     n_w = img_width // 8
 
@@ -247,27 +248,34 @@ def get_models(img_height, img_width, download_weights=True):
     encoder = Encoder()
     encoder = keras.models.Model(inp_img, encoder(inp_img))
 
-    if download_weights:
-        text_encoder_weights_fpath = keras.utils.get_file(
-            origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/text_encoder.h5",
-            file_hash="d7805118aeb156fc1d39e38a9a082b05501e2af8c8fbdc1753c9cb85212d6619",
-        )
+    text_encoder_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/text_encoder.h5",
+        file_hash="d7805118aeb156fc1d39e38a9a082b05501e2af8c8fbdc1753c9cb85212d6619",
+    )
+
+    # Load diffusion model weights from local file if provided, otherwise download
+    if local_weights_path and os.path.exists(local_weights_path):
+        diffusion_model_weights_fpath = keras.utils.get_file(local_weights_path)
+    else:
         diffusion_model_weights_fpath = keras.utils.get_file(
             origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/diffusion_model.h5",
             file_hash="a5b2eea58365b18b40caee689a2e5d00f4c31dbcb4e1d58a9cf1071f55bbbd3a",
         )
-        decoder_weights_fpath = keras.utils.get_file(
-            origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/decoder.h5",
-            file_hash="6d3c5ba91d5cc2b134da881aaa157b2d2adc648e5625560e3ed199561d0e39d5",
-        )
 
-        encoder_weights_fpath = keras.utils.get_file(
-            origin="https://huggingface.co/divamgupta/stable-diffusion-tensorflow/resolve/main/encoder_newW.h5",
-            file_hash="56a2578423c640746c5e90c0a789b9b11481f47497f817e65b44a1a5538af754",
-        )
+    decoder_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/decoder.h5",
+        file_hash="6d3c5ba91d5cc2b134da881aaa157b2d2adc648e5625560e3ed199561d0e39d5",
+    )
 
-        text_encoder.load_weights(text_encoder_weights_fpath)
-        diffusion_model.load_weights(diffusion_model_weights_fpath)
-        decoder.load_weights(decoder_weights_fpath)
-        encoder.load_weights(encoder_weights_fpath)
+    encoder_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/divamgupta/stable-diffusion-tensorflow/resolve/main/encoder_newW.h5",
+        file_hash="56a2578423c640746c5e90c0a789b9b11481f47497f817e65b44a1a5538af754",
+    )
+
+    text_encoder.load_weights(text_encoder_weights_fpath)
+    diffusion_model.load_weights(diffusion_model_weights_fpath)
+    decoder.load_weights(decoder_weights_fpath)
+    encoder.load_weights(encoder_weights_fpath)
+
     return text_encoder, diffusion_model, decoder , encoder
+

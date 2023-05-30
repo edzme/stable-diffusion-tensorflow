@@ -256,7 +256,7 @@ def get_models(img_height, img_width, local_weights_path=None):
 
     # Load diffusion model weights from local file if provided, otherwise download
     if local_weights_path and os.path.exists(local_weights_path):
-        diffusion_model_weights_fpath = local_weights_path
+        diffusion_model_weights_fpath = keras.utils.get_file(local_weights_path)
     else:
         diffusion_model_weights_fpath = keras.utils.get_file(
             origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/diffusion_model.h5",
